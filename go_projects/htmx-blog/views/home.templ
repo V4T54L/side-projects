@@ -1,0 +1,342 @@
+package views
+
+import "htmx-blog/internals/store"
+import "fmt"
+
+templ base(body templ.Component){
+	<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>HTMX-Blog</title>
+		<!-- Include Tailwind CSS -->
+		<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+		<!-- Include HTMX -->
+		<script src="https://unpkg.com/htmx.org"></script>
+	</head>
+	<body>
+		@body
+	</body>
+	</html>
+}
+
+templ login(){
+	<div class="flex items-center justify-center min-h-screen bg-gray-100">
+		<div class="bg-white shadow-md rounded px-8 py-6 mx-auto w-96">
+			<h1 class="text-2xl font-bold text-center mb-4">Login</h1>
+			<form id="login-form" hx-post="/api/v1/login" hx-target="#login-message" hx-swap="innerHTML">
+				<div class="mb-4">
+					<label for="username" class="block text-sm font-medium text-gray-700">Username:</label>
+					<input type="text" id="username" name="username" required 
+						class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500 px-2 py-1" />
+				</div>
+				<div class="mb-6">
+					<label for="password" class="block text-sm font-medium text-gray-700">Password:</label>
+					<input type="password" id="password" name="password" required 
+						class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-blue-500 focus:border-blue-500 px-2 py-1" />
+				</div>
+				<button type="submit" 
+					class="w-full bg-blue-500 text-white font-semibold py-2 rounded-md hover:bg-blue-600 transition duration-200">
+					Login
+				</button>
+			</form>
+			<div id="login-message" class="mt-4 text-center text-red-600"></div>
+		</div>
+	</div>
+}
+
+templ LoginPage(){
+	@base(login())
+}
+
+// <!-- ##################################################################################################### -->
+// <!-- ##################################################################################################### -->
+// <!-- ##################################################################################################### -->
+
+templ navbar(renderSearch bool){
+	<nav class="bg-white shadow">
+		<div class="container mx-auto flex justify-between items-center p-4">
+			<div class="flex items-center">
+				<img src="/static/logo.png" alt="Logo" class="h-8 mr-4" />
+				<h1 class="text-dark-gray text-lg font-bold">BlogApp</h1>
+			</div>
+
+			if renderSearch{
+				<div class="hidden md:flex flex-grow mx-4">
+					<input
+						type="text"
+						placeholder="Search..."
+						class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+					/>
+				</div>
+			}
+			<div class="flex items-center">
+				<div class="hidden md:flex items-center">
+					<img src="/static/logo.png" alt="User Icon" class="h-8 w-8 rounded-full" />
+					<span class="text-dark-gray mr-2">ditto</span>
+				</div>
+				<button class="md:hidden flex items-center bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+					Login
+				</button>
+			</div>
+		</div>
+
+		if renderSearch{
+			<div class="md:hidden p-4">
+				<input
+					type="text"
+					placeholder="Search..."
+					class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+				/>
+			</div>
+		}
+	</nav>
+}
+
+templ footer(){
+	<footer class="bg-light-gray p-6">
+		<div class="container mx-auto flex flex-col md:flex-row items-center justify-between">
+			<div class="flex items-center mb-4 md:mb-0">
+				<img src="/static/logo.png" alt="Company Icon" class="h-8 w-8 mr-2">
+				<span class="text-dark-gray text-lg font-bold">Company Name</span>
+			</div>
+			<div class="flex space-x-4">
+				<a href="https://facebook.com" target="_blank" class="text-dark-gray hover:text-blue-500">
+					<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+						<path d="M22.675 0h-21.35C.6 0 0 .6 0 1.325v21.35C0 23.4.6 24 1.325 24h21.35C23.4 24 24 23.4 24 22.675v-21.35C24 .6 23.4 0 22.675 0zm-2.075 12h-3.325v10.325h-4.125V12h-2.575v-3.06h2.575V7.5c0-2.94 1.64-4.5 4.36-4.5 1.265 0 2.644.225 2.644.225v2.934h-1.489C18.097 6.5 17.825 7.2 17.825 8.136v2.064h3.775l-.5 3.064z"/>
+					</svg>
+				</a>
+				<a href="https://twitter.com" target="_blank" class="text-dark-gray hover:text-blue-500">
+					<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+						<path d="M7.55 22.5c9.05 0 14.003-7.485 14.003-13.95 0-.213 0-.427-.015-.64A10.018 10.018 0 0024 6.47a9.72 9.72 0 01-2.825.775A4.861 4.861 0 0023.331 5c-.825.49-1.735.836-2.707 1.025a4.839 4.839 0 00-8.224 4.418A13.726 13.726 0 011.67 4.148a4.84 4.84 0 001.5 6.467A4.852 4.852 0 01.96 10.25v.062a4.837 4.837 0 003.884 4.762 4.89 4.89 0 01-2.212.084c.63 1.963 2.445 3.394 4.59 3.42a9.7 9.7 0 01-5.997 2.067c-.38 0-.755-.023-1.116-.067a13.656 13.656 0 007.65 2.24z"/>
+					</svg>
+				</a>
+				<a href="https://linkedin.com" target="_blank" class="text-dark-gray hover:text-blue-500">
+					<svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+						<path d="M22.225 0h-20.45C.997 0 0 .997 0 2.225v19.55C0 23.003.997 24 2.225 24h20.45C23.003 24 24 23.003 24 22.225V2.225C24 .997 23.003 0 22.225 0zM7.144 20.452H3.75V9h3.393v11.452zM5.446 7.652c-1.086 0-1.978-.88-1.978-1.977 0-1.085.884-1.977 1.978-1.977 1.085 0 1.978.892 1.978 1.977 0 1.097-.893 1.977-1.978 1.977zM20.25 20.451h-3.393v-5.534c0-1.318-.025-3.018-1.839-3.018-1.84 0-2.12 1.233-2.12 2.511V20.451H10.25V9h3.25v1.558h.045c.453-.858 1.562-1.762 3.253-1.762 3.486 0 4.129 2.29 4.129 5.279V20.451z"/>
+					</svg>
+				</a>
+			</div>
+		</div>
+	</footer>
+}
+
+templ layout(renderSearch bool, child templ.Component){
+	<div>
+		@navbar(renderSearch)
+		@child
+		@footer()
+	</div>
+}
+
+// <!-- ##################################################################################################### -->
+// <!-- ##################################################################################################### -->
+// <!-- ##################################################################################################### -->
+
+// ❣️😂🔖🗨️
+templ leftSidebar(){
+	<div>
+		<div class="hidden lg:block w-64 bg-light-gray shadow-lg p-4">
+			
+			<div class="flex items-center mb-6">
+				<i class="fas fa-users text-blue-500 text-2xl"></i>
+				<div class="ml-2">
+					<div class="text-dark-gray font-semibold">❣️</div>
+					<div class="text-dark-gray">150</div>
+				</div>
+			</div>
+			
+			<div class="flex items-center mb-6">
+				<i class="fab fa-react text-blue-500 text-2xl"></i>
+				<div class="ml-2">
+					<div class="text-dark-gray font-semibold">😂</div>
+					<div class="text-dark-gray">75</div>
+				</div>
+			</div>
+			
+			<div class="flex items-center mb-6">
+				<i class="fas fa-bookmark text-blue-500 text-2xl"></i>
+				<div class="ml-2">
+					<div class="text-dark-gray font-semibold">🔖</div>
+					<div class="text-dark-gray">20</div>
+				</div>
+			</div>
+
+			<button class="bg-blue-500 text-white py-2 px-4 rounded w-full hover:bg-blue-600">Share</button>
+		</div>
+
+		<div class="lg:hidden fixed bottom-0 left-0 right-0 bg-light-gray shadow-lg p-4">
+			<div class="flex justify-around">
+				<div class="flex flex-col items-center">
+					<i class="fas fa-users text-blue-500 text-xl"></i>
+					<div class="text-dark-gray">150</div>
+				</div>
+				<div class="flex flex-col items-center">
+					<i class="fab fa-react text-blue-500 text-xl"></i>
+					<div class="text-dark-gray">75</div>
+				</div>
+				<div class="flex flex-col items-center">
+					<i class="fas fa-bookmark text-blue-500 text-xl"></i>
+					<div class="text-dark-gray">20</div>
+				</div>
+			</div>
+			<button class="bg-blue-500 text-white py-2 px-4 rounded w-full mt-2 hover:bg-blue-600">Share</button>
+		</div>
+	</div>
+}
+
+templ rightSidebar(){
+	<div>
+		<h2 class="text-lg font-bold mb-4">Recent Posts</h2>
+		<ul>
+			<li class="mb-2"><a href="#" class="text-dark-gray hover:text-blue-500">Latest Innovations in Tech</a></li>
+			<li class="mb-2"><a href="#" class="text-dark-gray hover:text-blue-500">Understanding AI Ethics</a></li>
+			<li class="mb-2"><a href="#" class="text-dark-gray hover:text-blue-500">Political Changes in 2023</a></li>
+		</ul>
+	</div>
+}
+
+templ ApiBlogContent(blog store.Blog){
+	<div class="flex flex-col lg:flex-row">
+
+		<!-- Left Sidebar -->
+		<aside class="hidden lg:block w-1/4 bg-light-gray p-5">
+			@leftSidebar()
+		</aside>
+
+		<!-- Main Body -->
+		<main class="flex-1 bg-white p-5">
+			<div class="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+				<h1 class="text-3xl font-bold text-dark-gray mb-4">{blog.Title}</h1>
+				<div class="flex items-center mb-6">
+					<img src={blog.ImgUrl} alt="User Avatar" class="h-8 w-8 rounded-full mr-3">
+					<div>
+						<p class="text-dark-gray font-semibold">{blog.User}</p>
+						<p class="text-sm text-gray-500">Published on {blog.PublishedDate.Local().String()}</p>
+					</div>
+				</div>
+				<p class="text-base text-dark-gray mb-6">{blog.Description}</p>
+				
+
+				<h2 class="text-2xl font-bold text-dark-gray mb-4">Comments</h2>
+				
+				<div class="mb-4">
+					<textarea class="w-full p-3 border border-light-gray rounded-lg" placeholder="Leave a comment..."></textarea>
+					<button class="mt-2 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Post Comment</button>
+				</div>
+
+				for _, comment := range blog.Comments{
+					<div class="border-t border-light-gray pt-4">
+						<div class="mb-4">
+							<div class="flex items-start">
+								<img src="/static/logo.png" alt="User Avatar" class="h-8 w-8 rounded-full mr-2">
+								<div>
+									<p class="text-dark-gray font-semibold">{comment.User}</p>
+									<p class="text-sm text-gray-500 mb-2">{blog.PublishedDate.String()}</p>
+									<p class="text-base text-dark-gray">{comment.Comment}</p>
+								</div>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+		</main>
+
+		<!-- Right Sidebar -->
+		<aside class="hidden lg:block w-1/4 bg-light-gray p-5">
+			@rightSidebar()
+		</aside>
+		
+		<!-- Sticky Bottom Sidebar for Small and Medium Devices -->
+		<aside class="lg:hidden sticky bottom-0 w-full bg-light-gray p-4">
+			@leftSidebar()
+		</aside>
+	</div>
+}
+
+templ blogsList(){
+	<div class="container mx-auto p-6" id="main-content">
+		<!-- Search Input and Create Button -->
+		<div class="flex items-center mb-6">
+			<input type="text" placeholder="Search blogs..."
+			hx-get="/api/v1/search"
+    		hx-trigger="input changed delay:500ms"
+        	name="search" 
+			class="border border-gray-300 rounded p-2 flex-grow mr-2" />
+			<button class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Create</button>
+		</div>
+
+		<!-- Blog List -->
+		<div class="space-y-4">
+			<div hx-get="/api/v1/blogs" hx-trigger="load" hx-target="#loading-placeholder" hx-swap="outerHTML">
+				<div id="loading-placeholder" class="mt-4 text-center text-gray-800">Loading...</div>
+			</div>
+		</div>
+
+		<!-- Pagination Component -->
+		<div class="flex justify-between items-center mt-6">
+			<button class="bg-gray-300 text-dark-gray py-2 px-4 rounded hover:bg-gray-400">Back</button>
+
+			<div class="flex space-x-2">
+				<button class="bg-blue-500 text-white py-1 px-3 rounded">1</button>
+				<button class="bg-blue-500 text-white py-1 px-3 rounded">2</button>
+				<button class="bg-blue-500 text-white py-1 px-3 rounded">3</button>
+				<span class="py-1">...</span>
+				<button class="bg-blue-500 text-white py-1 px-3 rounded">10</button>
+			</div>
+
+			<button class="bg-gray-300 text-dark-gray py-2 px-4 rounded hover:bg-gray-400">Next</button>
+		</div>
+	</div>
+}
+
+templ APIBlogList(blogs []store.Blog){
+	for idx, blog := range blogs{
+		<div class="bg-white shadow-lg rounded-lg overflow-hidden mb-6 p-4"
+		hx-get={fmt.Sprintf("/api/v1/blogs/%d",idx)}
+		 hx-target="#main-content" hx-swap="innerHTML"
+		>
+			<h2 class="text-2xl font-bold text-dark-gray mb-2">{blog.Title}</h2>
+			<p class="text-base text-dark-gray mb-4">{blog.ShortDescription}</p>
+			
+			<div class="flex items-center justify-between text-gray-500 text-sm">
+				<span class="flex items-center">
+					<img src={blog.ImgUrl} alt="User" class="w-5 h-5 mr-1"/>
+					<span class="font-semibold">{blog.User}</span>
+				</span>
+				
+				<div class="flex items-center space-x-4">
+					<span class="flex items-center">
+						// <img src="path/to/view-icon.svg" alt="Views" class="w-4 h-4 mr-1"/>
+						<span>❣️</span>
+						<span>{blog.Likes}</span>
+					</span>
+					<span class="flex items-center">
+						// <img src="path/to/like-icon.svg" alt="Likes" class="w-4 h-4 mr-1"/>
+						<span>😂</span>
+						<span>{blog.Reacts}</span>
+					</span>
+					<span class="flex items-center">
+						// <img src="path/to/react-icon.svg" alt="Reactions" class="w-4 h-4 mr-1"/>
+						<span>🗨️</span>
+						<span>{fmt.Sprintf("%d",len(blog.Comments))}</span>
+					</span>
+					<span class="flex items-center">
+						// <img src="path/to/bookmark-icon.svg" alt="Bookmarks" class="w-4 h-4 mr-1"/>
+						<span>🔖</span>
+						<span>{blog.Bookmarks}</span>
+					</span>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+templ HomePage(){
+	@base(layout(false,blogsList()))
+}
+
+// templ ApiBlogContent(){
+// 	@
+// }
