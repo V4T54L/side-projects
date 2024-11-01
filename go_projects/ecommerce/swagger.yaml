@@ -1,0 +1,446 @@
+openapi: 3.0.0
+info:
+  title: E-Commerce API
+  description: API for managing e-commerce operations including user management, products, orders, etc.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1
+
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+      responses:
+        '201':
+          description: User registered successfully
+        '400':
+          description: Invalid input
+
+  /auth/login:
+    post:
+      summary: Authenticate a user and return a token
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                properties:
+                  token:
+                    type: string
+        '401':
+          description: Invalid credentials
+
+  /users:
+    get:
+      summary: Retrieve a list of users (Admin only)
+      operationId: getUsers
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDetails'
+        '403':
+          description: Forbidden
+
+  /users/{user_id}:
+    get:
+      summary: Retrieve user details by ID
+      operationId: getUserById
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: ID of the user
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+        '404':
+          description: User not found
+
+    put:
+      summary: Update user details
+      operationId: updateUser
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: ID of the user to update
+          schema:
+            type: integer
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: User updated successfully
+        '404':
+          description: User not found
+        '403':
+          description: Forbidden
+
+    delete:
+      summary: Mark a user as deleted (Admin only)
+      operationId: deleteUser
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: ID of the user to delete
+          schema:
+            type: integer
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: User deleted successfully
+        '403':
+          description: Forbidden
+        '404':
+          description: User not found
+
+  /products:
+    get:
+      summary: Retrieve a list of products
+      operationId: getProducts
+      responses:
+        '200':
+          description: A list of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductDetails'
+        '404':
+          description: Not found
+
+    post:
+      summary: Add a new product (Admin only)
+      operationId: addProduct
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCreate'
+      responses:
+        '201':
+          description: Product added successfully
+        '400':
+          description: Invalid input
+
+  /products/{product_id}:
+    get:
+      summary: Retrieve product details by ID
+      operationId: getProductById
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          description: ID of the product
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetails'
+        '404':
+          description: Product not found
+
+    put:
+      summary: Update a product (Admin only)
+      operationId: updateProduct
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          description: ID of the product to update
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpdate'
+      responses:
+        '200':
+          description: Product updated successfully
+        '404':
+          description: Product not found
+        '403':
+          description: Forbidden
+
+    delete:
+      summary: Mark a product as deleted (Admin only)
+      operationId: deleteProduct
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          description: ID of the product to delete
+          schema:
+            type: integer
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: Product deleted successfully
+        '403':
+          description: Forbidden
+        '404':
+          description: Product not found
+
+  /carts:
+    get:
+      summary: Retrieve the user's cart
+      operationId: getUserCart
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Cart found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartDetails'
+        '404':
+          description: Cart not found
+
+    post:
+      summary: Adds an item to the user's cart
+      operationId: addItemToCart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItemCreate'
+      security:
+        - BearerAuth: []
+      responses:
+        '201':
+          description: Item added to cart successfully
+        '404':
+          description: Product not found or Cart not found
+
+  /carts/{cart_item_id}:
+    put:
+      summary: Update an item in the user's cart
+      operationId: updateItemInCart
+      parameters:
+        - name: cart_item_id
+          in: path
+          required: true
+          description: ID of the cart item
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartItemUpdate'
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Cart item updated successfully
+        '404':
+          description: Item not found or Cart not found
+
+    delete:
+      summary: Remove an item from the user's cart
+      operationId: removeItemFromCart
+      parameters:
+        - name: cart_item_id
+          in: path
+          required: true
+          description: ID of the cart item to delete
+          schema:
+            type: integer
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: Item removed from cart successfully
+        '404':
+          description: Item not found or Cart not found
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    UserRegistration:
+      type: object
+      properties:
+        username:
+          type: string
+        hashed_password:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+      required:
+        - username
+        - hashed_password
+        - name
+        - email
+
+    UserLogin:
+      type: object
+      properties:
+        username:
+          type: string
+        hashed_password:
+          type: string
+      required:
+        - username
+        - hashed_password
+
+    UserDetails:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        username:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+
+    UserUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+      required:
+        - name
+        - email
+
+    ProductDetails:
+      type: object
+      properties:
+        product_id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        quantity:
+          type: integer
+        price:
+          type: number
+
+    ProductCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        quantity:
+          type: integer
+        price:
+          type: number
+      required:
+        - name
+        - description
+        - quantity
+        - price
+
+    ProductUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        quantity:
+          type: integer
+        price:
+          type: number
+      required:
+        - name
+        - description
+        - quantity
+        - price
+
+    CartDetails:
+      type: object
+      properties:
+        cart_id:
+          type: integer
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              product_id:
+                type: integer
+              quantity:
+                type: integer
+
+    CartItemCreate:
+      type: object
+      properties:
+        product_id:
+          type: integer
+        quantity:
+          type: integer
+      required:
+        - product_id
+        - quantity
+
+    CartItemUpdate:
+      type: object
+      properties:
+        quantity:
+          type: integer
+      required:
+        - quantity
