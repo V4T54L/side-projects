@@ -1,5 +1,9 @@
 package schemas
 
+type LoginResponse struct {
+	Token string `json:"token"`
+}
+
 type UserSignup struct {
 	Username        string `json:"username"`
 	EncodedPassword string `json:"encoded_password"`
